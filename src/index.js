@@ -1,12 +1,14 @@
 //require('dotenv').config({path: './env'})
 import dbConnection from './db/index.js';
 import dotenv from "dotenv";
+import {app} from "./app.js"
 dotenv.config({
     path: "./.env"
 })
-import express from "express"
 
-const app = express()
+// import express from "express"
+// const app = express()
+
 dbConnection()
 .then(()=>{
     app.listen(process.env.PORT || 3000, ()=>{
