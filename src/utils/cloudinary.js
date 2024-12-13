@@ -2,10 +2,13 @@ import { v2 as cloudinary } from "cloudinary"
 import fs from "fs"
 
 
-cloudinary.config({ 
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+//const cloudinary = require('cloudinary');
+
+cloudinary.config({
+  cloud_name: 'dqes4jlnf',
+  api_key: '189267991227771',
+  api_secret: 'CSspXyANeW7nwiDmKPHYgBvJWZk',
+  secure: true,
 });
 
 const cloudinaryUpload = async (localFilePath)=>{
@@ -16,6 +19,8 @@ const cloudinaryUpload = async (localFilePath)=>{
         const response = await cloudinary.uploader.upload(localFilePath,{
             resource_type : "auto",
         })
+        //console.log(response);
+        
         fs.unlinkSync(localFilePath)
         return response;
     } catch (error) {
@@ -25,4 +30,4 @@ const cloudinaryUpload = async (localFilePath)=>{
     
 }
 
-export default cloudinaryUpload
+export {cloudinaryUpload}

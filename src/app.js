@@ -19,7 +19,7 @@ app.use(cookieParser())
 import userRoutes from "./routes/user.routes.js"
 
 //declaration of routes
-app.use("/users", userRoutes)
+app.use("/api/v1", userRoutes)
 
 
 //export default app
