@@ -4,11 +4,19 @@ import { ApiError } from "../utils/apiError.js"
 import { cloudinaryUpload }  from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 
-const generateAccessAndRefreshToken = async (userId) => {
-    try { const user = User.findById(userId)
-     const accessToken = generateAccessToken()
-     const refreshToken = generateRefreshToken()
-
+const generateAccessAndRefreshToken = async function(userId){
+    try { 
+    //console.log(userId);
+    const user = await User.findById(userId)
+    //console.log(user);
+     if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+     const accessToken = user.generateAccessToken()
+     const refreshToken = user.generateRefreshToken()
+    //console.log(accessToken);
+    //console.log(refreshToken);
+    
      user.refreshToken = refreshToken
      user.save({validateBeforeSave : false}) 
 
@@ -101,10 +109,10 @@ const loginUser = asyncHandler( async (req, res) => {
 
     const {email, username, password} = req.body
 
-    if(!email || !username){
+    if(!(email || username)){
         throw new ApiError(400, "Please enter email or username to login")
     }
-
+    
    const user = await User.findOne({
         $or : [{email}, {username}]
     })
@@ -112,16 +120,17 @@ const loginUser = asyncHandler( async (req, res) => {
     if(!user){
         throw new ApiError(404, "User not found")
     }
-
+    //console.log(user);
     const isPasswordValid = await user.checkPassword(password)
-
+    
+    
     if(!isPasswordValid){
         throw new ApiError(402, "Password is incorrect")
     }
 
     const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
 
-    const loggedInUser = User.findById(user._id).select("-password -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     const options = {
         secure : true,

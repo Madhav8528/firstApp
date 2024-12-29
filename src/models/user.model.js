@@ -59,18 +59,19 @@ userSchema.pre("save", async function (next) {
     next()
 })
 
-userSchema.methods.checkPassword = async (password) => {
+userSchema.methods.checkPassword = async function (password){
    return await bcrypt.compare(password, this.password)
 }
 
 userSchema.methods.generateAccessToken = function(){
+    const payload = {
+        _id: this._id,
+        email: this.email,
+        username: this.username,
+        fullName: this.fullName,
+    };
     return jwt.sign(
-        {
-            _id: this._id,
-            email: this.email,
-            username: this.username,
-            fullName: this.fullName
-        },
+        payload,
         process.env.ACCESS_TOKEN_SECRET,
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
@@ -79,11 +80,11 @@ userSchema.methods.generateAccessToken = function(){
 }
 
 userSchema.methods.generateRefreshToken = function(){
+    const payload = {
+        _id : this._id
+    }
     return jwt.sign(
-        {
-            _id: this._id,
-            
-        },
+        payload,
         process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
