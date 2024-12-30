@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { cloudinaryUpload }  from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/apiResponse.js"
+import jwt from "jsonwebtoken"
 
 const generateAccessAndRefreshToken = async function(userId){
     try { 
@@ -173,4 +174,43 @@ const logOutUser = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerUser, loginUser, logOutUser};
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    
+    try {
+        const incomingToken = req.cookies?.refreshToken || req.body.refreshToken
+    
+        if(!incomingToken){
+            throw new ApiError(401, "No refresh token found")
+        }
+        const decodeToken = await jwt.verify(incomingToken, process.env.REFRESH_TOKEN_SECRET)
+    
+        const user = User.findById(decodeToken?._id)
+        if(!user){
+            throw new ApiError(402, "User with this token not found")
+        }
+        if(incomingToken !== user.refreshToken){
+            throw new ApiError(404, "User not found")
+        }
+    
+        const options = {
+            httpOnly : true,
+            secure : true
+        }
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshToken(user._id)
+    
+        return res.status(201)
+        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .json(
+            new ApiResponse(200,
+                {refreshToken : newRefreshToken, accessToken},
+                "Refresh token refreshed"
+            )
+        )       
+    } catch (error) {
+        throw new ApiError(414, "Something wrong while refreshing token")
+    }
+
+})
+
+export {registerUser, loginUser, logOutUser, refreshAccessToken};
