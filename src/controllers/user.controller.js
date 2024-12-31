@@ -234,7 +234,7 @@ const changeCurrentPassword = asyncHandler(async(req, res) => {
     )
 })
 
-const getCurrentUser = asyncHandle(async(req, res) => {
+const getCurrentUser = asyncHandler(async(req, res) => {
 
     return res.status(200)
     .json(
@@ -322,6 +322,78 @@ const updateCoverImage = asyncHandler(async (req, res) => {
     )
 })
 
+//performing db aggregation for joining models to showcase user profile
+
+const getUserProfile = asyncHandler(async (req, res) => {
+    
+    const { username } = req.params
+
+    if(!username.trim()){
+        throw new ApiError("Username not found in url")
+    }
+
+    const channel = await User.aggregate(
+        {
+            $match: {
+                username : username?.toLowerCase()
+            }
+        },
+        {
+            $lookup : {
+                from : "subscription",
+                localField : "_id",
+                foreignField : "channel",
+                as : "subscribers"
+            }
+        },
+        {
+            $lookup : {
+                from : "subscription",
+                localField : "_id",
+                foreignField : "subscriber",
+                as : "channelSubscribedTo"
+            }
+        },
+        {
+            $addFields : {
+                subscriberCount : {
+                    $size : "$subscribers"
+                },
+                channelSubscribedToCount : {
+                    $size : "$channelSubscribedTo"
+                },
+                //logic for "subscribed" button
+                isSubscribed : {
+                    $cond : {
+                        if : {$in : [req.user?._id, "$subscribers.subscriber"]},
+                        then : true,
+                        else : false
+                    }
+                },
+                $project : {
+                    fullName : 1,
+                    email : 1,
+                    username : 1,
+                    avatar : 1,
+                    coverImage : 1,
+                    subscriberCount : 1,
+                    channelSubscribedToCount : 1,
+                    isSubscribed : 1
+                }
+            }
+        }
+    )
+
+    if(!channel?.length){
+        throw new ApiError(500, "Something wrong while fetching details")
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200, channel[0], "User channel details fetched succesfully!"    )
+    )
+})
+
 
 export {registerUser,
         loginUser, 
@@ -331,4 +403,5 @@ export {registerUser,
         getCurrentUser,
         updateAccountDetails,
         updateAvatar,
-        updateCoverImage};
+        updateCoverImage,
+        getUserProfile};
