@@ -1,6 +1,6 @@
 import { Comment } from "../models/comment.model.js"
 import { Video } from "../models/video.model.js"
-import asyncHandler from "../utils/asyncHandler.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
 
@@ -125,7 +125,7 @@ const deleteComment = asyncHandler( async (req, res) => {
             throw new ApiError(404, "You are not owner of this comment!")
         }
 
-        await Comment.deleteOne()
+        await comment.deleteOne()
 
         return res.status(200)
         .json(
