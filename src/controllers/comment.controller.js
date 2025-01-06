@@ -3,7 +3,7 @@ import { Video } from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
-
+import mongoose from "mongoose";
 
 const getVideoComments = asyncHandler( async (req, res) => {
     
@@ -98,7 +98,8 @@ const updateComment = asyncHandler( async (req, res) => {
     if(!(req.user._id)){
         throw new ApiError(404, "Please login to update comment!")
     }
-    if(comment.owner !== req.user._id){
+    const ownerId = comment.owner.toString()
+    if(ownerId === req.user._id){
         throw new ApiError(404, "You are not owner of this comment!")
     }
     
@@ -121,7 +122,9 @@ const deleteComment = asyncHandler( async (req, res) => {
         }
 
         const comment = await Comment.findById(commentId)
-        if(comment.owner !== req.user._id){
+        console.log(comment.owner.toString());
+        const ownerId = comment.owner.toString()
+        if(ownerId === req.user._id){
             throw new ApiError(404, "You are not owner of this comment!")
         }
 

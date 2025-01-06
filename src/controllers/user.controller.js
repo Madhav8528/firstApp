@@ -45,7 +45,7 @@ const registerUser = asyncHandler( async(req,res)=>{
     // return res
 
     if(
-        [username, email, fullName, password].some((field)=>{field?.trim()===""})
+        [username, email, fullName, password].some((field)=>{ return field?.trim()===""})
     ){
         throw new ApiError(400, "Please provide all the details")
     }
@@ -246,23 +246,25 @@ const getCurrentUser = asyncHandler(async(req, res) => {
 const updateAccountDetails = asyncHandler( async (req, res) => {
     
     const {fullName, email} = req.body
-    if(!(fullName || email)){
-        throw new ApiError(400, "Update fields cannot be blank")
+    if([fullName, email].some((val)=>{return val?.trim()===""})){
+        throw new ApiError(400, "Please provide the details to update")
+    }
+    //console.log({fullName, email});
+    
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+             fullName,email
+        },
+        {new : true}
+    ).select("-password")
+
+    if(!user){
+        throw new ApiError(401, "User with this userId cannot be found")
     }
 
-    const user = await User.findByIdAndUpdate(req.user?._id,
-        {
-            $set : {
-                fullName : fullName,
-                email : email
-            }
-        },
-        { new : true } 
-    )
     return res.status(201)
-    .json(
-        new ApiResponse(201, user, "Details updated successfully!")
-    ).select("-password")
+    .json(new ApiResponse(201, user, "Details updated successfully!"))
 })
 
 const updateAvatar = asyncHandler(async (req, res) => {

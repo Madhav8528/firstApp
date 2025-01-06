@@ -2,11 +2,12 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
 import { Like } from "../models/like.model.js";
+import { isValidObjectId } from "mongoose";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     
     const { videoID } = req.params
-    if(!videoID){
+    if(isValidObjectId(videoID)){
         throw new ApiError(400, "Something wrong with url!")
     }
     if(!(req.user)){
@@ -27,7 +28,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     
     const like = await Like.create({
         video : videoID,
-        likedBy : req.user._id
+        likedBy : req.user._id,
     })
     if(!like){
         throw new ApiError(400, "Something went wrong!")
@@ -120,8 +121,8 @@ const getLikedVideos = asyncHandler( async (req, res) => {
     const likedVideos = await Like.find({
         likedBy : req.user._id
     })
-    .populate("video", "_id title thumbnail description ")
-    .select("video")
+    .populate("video")
+    
 
     if(!likedVideos){
         throw new ApiError(404, "Unable to get liked videos")

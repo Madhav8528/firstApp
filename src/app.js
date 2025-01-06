@@ -17,14 +17,15 @@ app.use(cookieParser())
 
 //import routes
 import userRoutes from "./routes/user.routes.js"
-import commentRoutes from "./routes/comment.route.js"
-import likeRoutes from "./routes/like.route.js"
+import commentRoutes from "./routes/comment.routes.js"
+import likeRoutes from "./routes/like.routes.js"
+import videoRoutes from "./routes/video.routes.js"
 
 //declaration of routes
 app.use("/api/v1/user", userRoutes)
-app.use("api/v1/comment", commentRoutes)
-app.use("api/v1/like", likeRoutes)
-
+app.use("/api/v1/comment", commentRoutes)
+app.use("/api/v1/like", likeRoutes)
+app.use("/api/v1/video", videoRoutes)
 //export default app
 //OR
 export {app}
