@@ -24,6 +24,7 @@ import tweetRoutes from "./routes/tweet.routes.js"
 import playlistRoutes from "./routes/playlist.routes.js"
 import subscriptionRoutes from "./routes/subscription.routes.js"
 import healthcheckRoutes from "./routes/healthcheck.routes.js"
+import dashboardRouters from "./routes/dashboard.routes.js"
 
 //declaration of routes
 app.use("/api/v1/user", userRoutes)
@@ -34,6 +35,7 @@ app.use("/api/v1/tweet", tweetRoutes)
 app.use("/api/v1/playlist", playlistRoutes)
 app.use("/api/v1/subscription", subscriptionRoutes)
 app.use("/api/v1/healthcheck", healthcheckRoutes)
+app.use("/api/v1/dashboard", dashboardRouters)
 
 //export default app
 //OR
